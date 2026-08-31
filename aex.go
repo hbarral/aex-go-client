@@ -38,8 +38,11 @@ type Config struct {
 	// PrivateKey (clave_privada) authorizes access. It is never sent in
 	// plain text; it is transmitted as md5(PrivateKey + SessionCode).
 	PrivateKey string
-	// SessionCode (codigo_sesion) is the validation piece combined with
-	// PrivateKey for hashing.
+	// SessionCode (codigo_sesion) is a client-chosen string sent along
+	// with the hashed PrivateKey. It can be a fixed value (e.g., "prueba")
+	// or a dynamic one generated per session (e.g., a UUID); the same
+	// value used for hashing is transmitted in plain text so the API can
+	// validate the hash.
 	SessionCode string
 	// Sandbox selects the test environment when true, production when false.
 	Sandbox bool
