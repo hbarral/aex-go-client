@@ -67,14 +67,14 @@ func (p CalculateParams) validate() error {
 // cost and additional services, as returned by Calculate.
 type ServiceQuote struct {
 	// ServiceTypeID is the AEX service identifier.
-	ServiceTypeID int `json:"id_tipo_servicio"`
+	ServiceTypeID FlexInt `json:"id_tipo_servicio"`
 	// ServiceType is the service name.
 	ServiceType string `json:"tipo_servicio"`
 	// Description is the detailed service description.
 	Description string `json:"descripcion"`
 	// DeliveryTime is the estimated maximum delivery time in hours,
 	// counted from cargo pickup.
-	DeliveryTime int `json:"tiempo_entrega"`
+	DeliveryTime FlexInt `json:"tiempo_entrega"`
 	// IncludesPickup reports whether the service requires pickup; when
 	// false the client leaves packages at a delivery point.
 	IncludesPickup TFBool `json:"incluye_pickup"`
@@ -82,7 +82,7 @@ type ServiceQuote struct {
 	// when false the client picks packages up at a delivery point.
 	IncludesDelivery TFBool `json:"incluye_envio"`
 	// FreightCost is the freight cost in guaraníes.
-	FreightCost float64 `json:"costo_flete"`
+	FreightCost FlexFloat `json:"costo_flete"`
 	// AdditionalServices lists extra services besides freight (e.g.,
 	// insurance).
 	AdditionalServices []AdditionalService `json:"adicionales"`

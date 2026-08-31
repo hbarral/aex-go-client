@@ -7,13 +7,31 @@ import (
 	"time"
 )
 
+// ResultCode is the operation result code (codigo) of the response
+// envelope. The documentation defines it as a string, but the API encodes
+// it inconsistently as either a JSON string ("0") or a JSON number (0);
+// both shapes decode to the same value.
+type ResultCode string
+
+// UnmarshalJSON implements json.Unmarshaler, tolerating strings, numbers,
+// and null.
+func (r *ResultCode) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	if s == "" || s == "null" {
+		*r = ""
+		return nil
+	}
+	*r = ResultCode(s)
+	return nil
+}
+
 // baseResponse is the common envelope returned by every JSON endpoint of
 // the AEX API. Concrete response types embed it.
 type baseResponse struct {
 	// Codigo is the operation result code. "0" means the operation was
 	// processed correctly; any other value indicates an error whose
 	// description is in Mensaje.
-	Codigo string `json:"codigo"`
+	Codigo ResultCode `json:"codigo"`
 	// Mensaje contains relevant details of the executed process, or the
 	// error description when Codigo is not "0".
 	Mensaje string `json:"mensaje"`
@@ -27,7 +45,7 @@ func checkResponse(endpoint string, resp baseResponse) error {
 		return nil
 	}
 	return &APIError{
-		Code:     resp.Codigo,
+		Code:     string(resp.Codigo),
 		Message:  resp.Mensaje,
 		Endpoint: endpoint,
 	}
@@ -172,8 +190,8 @@ func (t *TFBool) UnmarshalJSON(data []byte) error {
 }
 
 // FlexInt is an integer that the API sometimes encodes as a JSON string
-// (e.g., delivery point identifiers). It unmarshals from both numbers and
-// strings, and marshals as a number.
+// (e.g., delivery point identifiers, service type identifiers). It
+// unmarshals from both numbers and strings, and marshals as a number.
 type FlexInt int
 
 // MarshalJSON implements json.Marshaler.
@@ -193,6 +211,58 @@ func (f *FlexInt) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("aex: cannot parse integer %q", s)
 	}
 	*f = FlexInt(n)
+	return nil
+}
+
+// FlexFloat is a float that the API sometimes encodes as a JSON string
+// (e.g., costs, coordinates). It unmarshals from both numbers and
+// strings, and marshals as a number.
+type FlexFloat float64
+
+// MarshalJSON implements json.Marshaler.
+func (f FlexFloat) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.FormatFloat(float64(f), 'f', -1, 64)), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (f *FlexFloat) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	if s == "" || s == "null" {
+		*f = 0
+		return nil
+	}
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return fmt.Errorf("aex: cannot parse float %q", s)
+	}
+	*f = FlexFloat(v)
+	return nil
+}
+
+// FlexBool is a boolean that the API sometimes encodes as a JSON string
+// ("true"/"false") or as 1/0. It unmarshals from all of those shapes, and
+// marshals as a plain boolean.
+type FlexBool bool
+
+// MarshalJSON implements json.Marshaler.
+func (b FlexBool) MarshalJSON() ([]byte, error) {
+	if b {
+		return []byte("true"), nil
+	}
+	return []byte("false"), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (b *FlexBool) UnmarshalJSON(data []byte) error {
+	s := strings.ToLower(strings.Trim(string(data), `"`))
+	switch s {
+	case "true", "t", "1":
+		*b = true
+	case "false", "f", "0", "", "null":
+		*b = false
+	default:
+		return fmt.Errorf("aex: cannot parse boolean %q", s)
+	}
 	return nil
 }
 
@@ -216,9 +286,9 @@ const (
 // attached to a quote or service condition.
 type AdditionalService struct {
 	// ID is the AEX additional service identifier (id_adicional).
-	ID int `json:"id_adicional"`
+	ID FlexInt `json:"id_adicional"`
 	// Name is the service name (denominacion).
 	Name string `json:"denominacion"`
 	// Cost is the additional service cost in guaraníes.
-	Cost float64 `json:"costo"`
+	Cost FlexFloat `json:"costo"`
 }

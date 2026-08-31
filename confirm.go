@@ -126,9 +126,9 @@ type Location struct {
 	// MobilePhone is a mobile phone.
 	MobilePhone int `json:"telefono_movil,omitempty"`
 	// Latitude of the location.
-	Latitude float64 `json:"latitud,omitempty"`
+	Latitude FlexFloat `json:"latitud,omitempty"`
 	// Longitude of the location.
-	Longitude float64 `json:"longitud,omitempty"`
+	Longitude FlexFloat `json:"longitud,omitempty"`
 	// LocationURL points at the pickup or delivery location; an
 	// alternative to coordinates.
 	LocationURL string `json:"url_ubicacion,omitempty"`
@@ -185,10 +185,10 @@ type ConfirmServiceParams struct {
 	authFields
 	// RequestID is the service request identifier (ServiceOffer.ID)
 	// returned by RequestService.
-	RequestID int `json:"id_solicitud"`
+	RequestID FlexInt `json:"id_solicitud"`
 	// ServiceTypeID is the selected service condition
 	// (ServiceCondition.ServiceTypeID).
-	ServiceTypeID int `json:"id_tipo_servicio"`
+	ServiceTypeID FlexInt `json:"id_tipo_servicio"`
 	// Sender is the sender data. When nil, the API assumes the sender from
 	// the credentials used for authentication.
 	Sender *Party `json:"remitente,omitempty"`
@@ -200,7 +200,7 @@ type ConfirmServiceParams struct {
 	Delivery *Location `json:"entrega"`
 	// AdditionalIDs lists non-mandatory additional service identifiers to
 	// contract (ConditionAdditional.ID). Mandatory ones must not be sent.
-	AdditionalIDs []int `json:"adicionales,omitempty"`
+	AdditionalIDs []FlexInt `json:"adicionales,omitempty"`
 	// PaymentMethod is PaymentCredit (default), PaymentOrigin, or
 	// PaymentDestination. When PaymentOrigin or PaymentDestination, the
 	// distributor charges the recipient for the service and AEX issues the

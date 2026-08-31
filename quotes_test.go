@@ -3,6 +3,7 @@ package aex
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 )
 
@@ -95,6 +96,64 @@ func TestCalculateLoadTypeSent(t *testing.T) {
 	}
 	if captured["codigo_tipo_carga"] != LoadDocument {
 		t.Errorf("codigo_tipo_carga = %v, want %q", captured["codigo_tipo_carga"], LoadDocument)
+	}
+}
+
+func TestCalculateStringEncodedNumbers(t *testing.T) {
+	// The live sandbox encodes documented numbers as JSON strings
+	// (confirmed for id_tipo_servicio); every numeric and boolean field
+	// must decode from either shape.
+	const payload = `{
+		"codigo": 0,
+		"mensaje": "OK",
+		"datos": [
+			{
+				"id_tipo_servicio": "3",
+				"tipo_servicio": "Moto",
+				"descripcion": "Entrega el mismo dia",
+				"tiempo_entrega": "6",
+				"incluye_pickup": "t",
+				"incluye_envio": "t",
+				"costo_flete": "25000.5",
+				"adicionales": [
+					{"id_adicional": "1", "denominacion": "Seguro", "costo": "500"}
+				]
+			}
+		]
+	}`
+
+	client, _ := newTestClient(t, countingAuthEndpoint(t, new(int), func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(payload))
+	}))
+
+	quotes, err := client.Calculate(context.Background(), CalculateParams{
+		Origin:   "ASU",
+		Destino:  "CDE",
+		Packages: []Package{{Weight: 1, Length: 1, Height: 1, Width: 1}},
+	})
+	if err != nil {
+		t.Fatalf("Calculate: %v", err)
+	}
+	if len(quotes) != 1 {
+		t.Fatalf("len(quotes) = %d, want 1", len(quotes))
+	}
+
+	quote := quotes[0]
+	if quote.ServiceTypeID != 3 {
+		t.Errorf("ServiceTypeID = %d, want 3 (string decoded)", quote.ServiceTypeID)
+	}
+	if quote.DeliveryTime != 6 {
+		t.Errorf("DeliveryTime = %d, want 6 (string decoded)", quote.DeliveryTime)
+	}
+	if quote.FreightCost != 25000.5 {
+		t.Errorf("FreightCost = %v, want 25000.5 (string decoded)", quote.FreightCost)
+	}
+	if len(quote.AdditionalServices) != 1 {
+		t.Fatalf("len(AdditionalServices) = %d, want 1", len(quote.AdditionalServices))
+	}
+	if got := quote.AdditionalServices[0]; got.ID != 1 || got.Cost != 500 {
+		t.Errorf("AdditionalServices[0] = %+v (string decoded)", got)
 	}
 }
 

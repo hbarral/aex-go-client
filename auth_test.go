@@ -120,6 +120,55 @@ func TestAuthenticateEmptyCode(t *testing.T) {
 	}
 }
 
+func TestAuthenticateNumericResultCodes(t *testing.T) {
+	// The live API encodes the result code as a JSON number even though
+	// the documentation defines it as a string.
+	tests := []struct {
+		name      string
+		body      string
+		wantToken string
+		wantErrIs error
+	}{
+		{
+			name:      "numeric success code",
+			body:      `{"codigo":0,"mensaje":"OK","codigo_autorizacion":"token-1"}`,
+			wantToken: "token-1",
+		},
+		{
+			name:      "numeric error code",
+			body:      `{"codigo":1,"mensaje":"credenciales invalidas","codigo_autorizacion":null}`,
+			wantErrIs: ErrUnauthorized,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(tt.body))
+			}))
+
+			code, err := client.Authenticate(context.Background())
+			if tt.wantErrIs != nil {
+				if !errors.Is(err, tt.wantErrIs) {
+					t.Fatalf("error = %v, want %v", err, tt.wantErrIs)
+				}
+				var apiErr *APIError
+				if !errors.As(err, &apiErr) || apiErr.Code != "1" {
+					t.Errorf("error = %v, want *APIError with code 1", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Authenticate: %v", err)
+			}
+			if code != tt.wantToken {
+				t.Errorf("code = %q, want %q", code, tt.wantToken)
+			}
+		})
+	}
+}
+
 func TestTokenExpiryTriggersRegeneration(t *testing.T) {
 	var authCalls int
 

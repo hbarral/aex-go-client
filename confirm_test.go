@@ -26,7 +26,7 @@ func validConfirmParams() ConfirmServiceParams {
 			Phones:         []Phone{{Number: 98111222, Name: "celular"}},
 		},
 		Delivery:      NewDeliveryPointLocation(17),
-		AdditionalIDs: []int{1},
+		AdditionalIDs: []FlexInt{1},
 		PaymentMethod: PaymentDestination,
 	}
 }

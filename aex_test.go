@@ -170,7 +170,7 @@ func TestDoRequestContextCancelled(t *testing.T) {
 func TestCheckResponse(t *testing.T) {
 	tests := []struct {
 		name     string
-		codigo   string
+		codigo   ResultCode
 		mensaje  string
 		wantErr  bool
 		wantCode string

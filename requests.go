@@ -49,11 +49,11 @@ func (p RequestServiceParams) validate() error {
 // generate a return.
 type ReturnShipment struct {
 	// ServiceTypeID is the service type ID to use for the return guide.
-	ServiceTypeID int `json:"id_tipo_servicio"`
+	ServiceTypeID FlexInt `json:"id_tipo_servicio"`
 	// ServiceType is the service name.
 	ServiceType string `json:"tipo_servicio"`
 	// Cost is the additional service cost in guaraníes.
-	Cost float64 `json:"costo"`
+	Cost FlexFloat `json:"costo"`
 	// LoadType is LoadDocument ("D") when the return corresponds to
 	// documents that must be completed and returned to the sender, or
 	// LoadPackage ("P") when packages are collected from the delivery
@@ -67,17 +67,17 @@ type ConditionAdditional struct {
 	AdditionalService
 	// Mandatory reports whether the additional service must be contracted.
 	// Mandatory ones must not be sent in ConfirmService.
-	Mandatory bool `json:"obligatorio"`
+	Mandatory FlexBool `json:"obligatorio"`
 	// Collection reports whether the additional service is a collection
 	// (cash on delivery) type. There may be more than one collection
 	// service varying by coverage, but only one per condition is returned.
-	Collection bool `json:"cobranza"`
+	Collection FlexBool `json:"cobranza"`
 	// Preselected reports whether the service is selected by default for
 	// the service type. When false, its cost should not be counted toward
 	// the total freight.
-	Preselected bool `json:"preseleccionado"`
+	Preselected FlexBool `json:"preseleccionado"`
 	// Value is the amount the cost was calculated on.
-	Value float64 `json:"valor"`
+	Value FlexFloat `json:"valor"`
 	// Return contains return shipment information, or is null when the
 	// additional service does not generate a return shipment.
 	Return *ReturnShipment `json:"devolucion"`
@@ -87,7 +87,7 @@ type ConditionAdditional struct {
 // returned by RequestService. The chosen condition feeds ConfirmService.
 type ServiceCondition struct {
 	// ServiceTypeID is the AEX service identifier.
-	ServiceTypeID int `json:"id_tipo_servicio"`
+	ServiceTypeID FlexInt `json:"id_tipo_servicio"`
 	// ServiceType is the service type name.
 	ServiceType string `json:"tipo_servicio"`
 	// Description is the detailed service description.
@@ -99,13 +99,13 @@ type ServiceCondition struct {
 	// false the client picks packages up at a delivery point.
 	IncludesDelivery TFBool `json:"incluye_envio"`
 	// FreightCost is the freight cost in guaraníes.
-	FreightCost float64 `json:"costo_flete"`
+	FreightCost FlexFloat `json:"costo_flete"`
 	// AdditionalServices lists extra services to freight (e.g.,
 	// insurance).
 	AdditionalServices []ConditionAdditional `json:"adicionales"`
 	// DeliveryTime is the estimated maximum delivery time in hours,
 	// counted from cargo pickup.
-	DeliveryTime int `json:"tiempo_entrega"`
+	DeliveryTime FlexInt `json:"tiempo_entrega"`
 	// DeliveryPoints lists the points available for package delivery.
 	DeliveryPoints []DeliveryPoint `json:"puntos_entrega"`
 }
@@ -115,7 +115,7 @@ type ServiceCondition struct {
 type ServiceOffer struct {
 	// ID is the service offer identifier (id_solicitud) to pass to
 	// ConfirmService.
-	ID int `json:"id_solicitud"`
+	ID FlexInt `json:"id_solicitud"`
 	// Conditions lists the available services for the shipment.
 	Conditions []ServiceCondition `json:"condiciones"`
 }

@@ -19,7 +19,7 @@ type ProductStock struct {
 	// product in the warehouse.
 	ProductCode string `json:"codigo_producto"`
 	// Stock is the available product quantity in inventory.
-	Stock int `json:"existencia"`
+	Stock FlexInt `json:"existencia"`
 	// Name is the product name.
 	Name string `json:"denominacion"`
 }
