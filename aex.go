@@ -116,41 +116,51 @@ func New(config Config, opts ...Option) (*Client, error) {
 // code in the response envelope) are surfaced by the caller through
 // checkResponse, since response types embed their own envelope fields.
 func (c *Client) doRequest(ctx context.Context, path string, payload any, out any) error {
+	body, _, err := c.post(ctx, path, payload)
+	if err != nil {
+		return err
+	}
+	if out == nil {
+		return nil
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return fmt.Errorf("aex: decode response %s: %w", path, err)
+	}
+	return nil
+}
+
+// post sends payload as a JSON POST request against the given API path and
+// returns the raw response body together with its Content-Type. It returns
+// an *HTTPError for non-2xx statuses.
+func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, string, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("aex: encode request %s: %w", path, err)
+		return nil, "", fmt.Errorf("aex: encode request %s: %w", path, err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("aex: build request %s: %w", path, err)
+		return nil, "", fmt.Errorf("aex: build request %s: %w", path, err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("aex: request %s: %w", path, err)
+		return nil, "", fmt.Errorf("aex: request %s: %w", path, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &HTTPError{
+		return nil, "", &HTTPError{
 			Endpoint:   path,
 			StatusCode: resp.StatusCode,
 		}
 	}
 
-	if out == nil {
-		_, err = io.Copy(io.Discard, resp.Body)
-		if err != nil {
-			return fmt.Errorf("aex: drain response %s: %w", path, err)
-		}
-		return nil
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, "", fmt.Errorf("aex: read response %s: %w", path, err)
 	}
-
-	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return fmt.Errorf("aex: decode response %s: %w", path, err)
-	}
-	return nil
+	return data, resp.Header.Get("Content-Type"), nil
 }

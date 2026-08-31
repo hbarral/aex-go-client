@@ -112,23 +112,31 @@ func (c *Client) generateToken(ctx context.Context) (string, error) {
 // It injects the public key and a current authorization code into payload
 // (which must embed authFields), decodes the response into out, and
 // validates the response envelope.
-//
-// If the response reports an API error and the code was reused from the
-// cache, the code may have expired server-side before its nominal
-// validity ended; in that case doAuthenticated re-authenticates and
-// retries the request exactly once. Calls made with a freshly generated
-// code are never retried.
 func (c *Client) doAuthenticated(ctx context.Context, path string, payload any, out any) error {
+	return c.runAuthenticated(ctx, path, payload, func() error {
+		if err := c.doRequest(ctx, path, payload, out); err != nil {
+			return err
+		}
+		return responseError(path, out)
+	})
+}
+
+// runAuthenticated injects the public key and a current authorization code
+// into payload (which must embed authFields) and executes op.
+//
+// If op reports an API error and the code was reused from the cache, the
+// code may have expired server-side before its nominal validity ended; in
+// that case runAuthenticated re-authenticates and executes op again
+// exactly once. Calls made with a freshly generated code are never
+// retried.
+func (c *Client) runAuthenticated(ctx context.Context, path string, payload any, op func() error) error {
 	code, fresh, err := c.authorizationCode(ctx)
 	if err != nil {
 		return err
 	}
 
 	setRequestCredentials(payload, c.config.PublicKey, code)
-	if err := c.doRequest(ctx, path, payload, out); err != nil {
-		return err
-	}
-	err = responseError(path, out)
+	err = op()
 	if err == nil {
 		return nil
 	}
@@ -143,10 +151,7 @@ func (c *Client) doAuthenticated(ctx context.Context, path string, payload any, 
 		return err
 	}
 	setRequestCredentials(payload, c.config.PublicKey, code)
-	if err := c.doRequest(ctx, path, payload, out); err != nil {
-		return err
-	}
-	return responseError(path, out)
+	return op()
 }
 
 // setRequestCredentials injects credentials into a request payload that
