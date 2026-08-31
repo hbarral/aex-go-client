@@ -6,11 +6,23 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 // jsonDecodeStrict decodes r's body into v, failing the test on error.
 func jsonDecodeStrict(r *http.Request, v any) error {
 	return json.NewDecoder(r.Body).Decode(v)
+}
+
+// dateFrom parses a yyyy-mm-dd string into a time.Time, failing the test
+// on error.
+func dateFrom(t *testing.T, value string) time.Time {
+	t.Helper()
+	parsed, err := time.Parse(dateLayout, value)
+	if err != nil {
+		t.Fatalf("parse date %q: %v", value, err)
+	}
+	return parsed
 }
 
 // readFixture loads a JSON fixture from testdata/.

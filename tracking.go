@@ -63,3 +63,47 @@ func (c *Client) Tracking(ctx context.Context, params TrackingParams) ([]Trackin
 	}
 	return resp.Datos, nil
 }
+
+const incidentManagementPath = "envios/gestion_novedad"
+
+// IncidentManagementParams are the parameters of the Shipments Incident
+// Management method, which registers the result of an incident management.
+type IncidentManagementParams struct {
+	authFields
+	// GuideNumber is the guide number the management refers to.
+	GuideNumber string `json:"numero_guia"`
+	// EventTypeCode is the code of the event type resulting from the
+	// management.
+	EventTypeCode string `json:"codigo_tipo_evento"`
+	// ManagementDate is the date the management was carried out.
+	ManagementDate *Date `json:"fecha_gestion"`
+	// Observations details the management result.
+	Observations string `json:"observaciones,omitempty"`
+}
+
+func (p IncidentManagementParams) validate() error {
+	if p.GuideNumber == "" {
+		return fmt.Errorf("aex: incident management: GuideNumber is required")
+	}
+	if p.EventTypeCode == "" {
+		return fmt.Errorf("aex: incident management: EventTypeCode is required")
+	}
+	if p.ManagementDate == nil || p.ManagementDate.IsZero() {
+		return fmt.Errorf("aex: incident management: ManagementDate is required")
+	}
+	return nil
+}
+
+// IncidentManagement registers the result of an incident management for a
+// guide.
+func (c *Client) IncidentManagement(ctx context.Context, params IncidentManagementParams) error {
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	var resp baseResponse
+	if err := c.doAuthenticated(ctx, incidentManagementPath, &params, &resp); err != nil {
+		return err
+	}
+	return nil
+}

@@ -1,0 +1,68 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": {
+    "id_solicitud": 123,
+    "condiciones": [
+      {
+        "id_tipo_servicio": 3,
+        "tipo_servicio": "Moto",
+        "descripcion": "Entrega el mismo dia dentro de la ciudad",
+        "incluye_pickup": "t",
+        "incluye_envio": "t",
+        "costo_flete": 25000.5,
+        "adicionales": [
+          {
+            "id_adicional": 1,
+            "denominacion": "Seguro",
+            "costo": 500,
+            "obligatorio": false,
+            "cobranza": false,
+            "preseleccionado": true,
+            "valor": 100000,
+            "devolucion": null
+          },
+          {
+            "id_adicional": 2,
+            "denominacion": "Contrareembolso",
+            "costo": 3000,
+            "obligatorio": false,
+            "cobranza": true,
+            "preseleccionado": false,
+            "valor": 150000,
+            "devolucion": {
+              "id_tipo_servicio": 5,
+              "tipo_servicio": "Moto retorno",
+              "costo": 20000,
+              "codigo_tipo_carga": "D"
+            }
+          }
+        ],
+        "tiempo_entrega": 6,
+        "puntos_entrega": [
+          {
+            "id": 17,
+            "punto_entrega": "CAC Centro",
+            "tipo": "CAC",
+            "direccion": "Av. Example 123",
+            "latitud": -25.282,
+            "longitud": -57.635,
+            "telefono": "021123456",
+            "horario_atencion": "L-S 08:00-18:00"
+          }
+        ]
+      },
+      {
+        "id_tipo_servicio": 4,
+        "tipo_servicio": "Retiro en sucursal",
+        "descripcion": "Retira en punto de entrega",
+        "incluye_pickup": "f",
+        "incluye_envio": "f",
+        "costo_flete": 15000,
+        "adicionales": [],
+        "tiempo_entrega": 48,
+        "puntos_entrega": []
+      }
+    ]
+  }
+}

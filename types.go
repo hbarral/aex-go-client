@@ -102,6 +102,48 @@ func (d *DateTime) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("aex: cannot parse date %q", s)
 }
 
+// MarshalJSON implements json.Marshaler, emitting the API's date format.
+// The zero time marshals as null.
+func (d DateTime) MarshalJSON() ([]byte, error) {
+	if d.IsZero() {
+		return []byte("null"), nil
+	}
+	return []byte(`"` + d.Format(dateTimeLayout) + `"`), nil
+}
+
+// dateLayout is the plain date format used by the API: yyyy-mm-dd.
+const dateLayout = "2006-01-02"
+
+// Date is a time.Time that (un)marshals the API's plain date format
+// ("2025-06-06"). Null and empty values decode to the zero date; the zero
+// date marshals as null.
+type Date struct {
+	time.Time
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (d *Date) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	if s == "" || s == "null" {
+		d.Time = time.Time{}
+		return nil
+	}
+	t, err := time.Parse(dateLayout, s)
+	if err != nil {
+		return fmt.Errorf("aex: cannot parse date %q", s)
+	}
+	d.Time = t
+	return nil
+}
+
+// MarshalJSON implements json.Marshaler.
+func (d Date) MarshalJSON() ([]byte, error) {
+	if d.IsZero() {
+		return []byte("null"), nil
+	}
+	return []byte(`"` + d.Format(dateLayout) + `"`), nil
+}
+
 // TFBool is a boolean that the API encodes as the strings "t" and "f"
 // (e.g., incluye_pickup, incluye_envio). It also tolerates true, false,
 // and null on decode.

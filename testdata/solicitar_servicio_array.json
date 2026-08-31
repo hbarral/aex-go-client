@@ -1,0 +1,22 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "id_solicitud": 456,
+      "condiciones": [
+        {
+          "id_tipo_servicio": 3,
+          "tipo_servicio": "Moto",
+          "descripcion": "Entrega el mismo dia",
+          "incluye_pickup": "t",
+          "incluye_envio": "t",
+          "costo_flete": 25000,
+          "adicionales": [],
+          "tiempo_entrega": 6,
+          "puntos_entrega": []
+        }
+      ]
+    }
+  ]
+}
