@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -49,6 +50,12 @@ type Client struct {
 	config     Config
 	baseURL    string
 	httpClient *http.Client
+
+	// mu guards token and tokenAcquiredAt for the automatic
+	// authorization-code lifecycle (see auth.go).
+	mu              sync.Mutex
+	token           string
+	tokenAcquiredAt time.Time
 }
 
 // Option customizes a Client constructed by New.

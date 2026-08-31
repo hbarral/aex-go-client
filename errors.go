@@ -1,6 +1,13 @@
 package aex
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+// ErrUnauthorized is returned, wrapped, when the AEX API rejects the
+// configured credentials or returns an empty authorization code.
+var ErrUnauthorized = errors.New("aex: unauthorized")
 
 // APIError represents an error returned by the AEX API in the response
 // envelope: a result code other than "0" together with a message
