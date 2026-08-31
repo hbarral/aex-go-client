@@ -1,5 +1,12 @@
 package aex
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+)
+
 // baseResponse is the common envelope returned by every JSON endpoint of
 // the AEX API. Concrete response types embed it.
 type baseResponse struct {
@@ -66,4 +73,110 @@ type authFields struct {
 func (a *authFields) setCredentials(publicKey, authorizationCode string) {
 	a.PublicKey = publicKey
 	a.AuthorizationCode = authorizationCode
+}
+
+// dateTimeLayout is the event date format used by the API:
+// yyyy-mm-dd H:i:s.
+const dateTimeLayout = "2006-01-02 15:04:05"
+
+// DateTime is a time.Time that unmarshals from the API's date format
+// ("2025-06-06 12:34:56"). It also tolerates RFC 3339, null, and empty
+// values; the latter decode to the zero time.
+type DateTime struct {
+	time.Time
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (d *DateTime) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	if s == "" || s == "null" {
+		d.Time = time.Time{}
+		return nil
+	}
+	for _, layout := range []string{dateTimeLayout, time.RFC3339} {
+		if t, err := time.Parse(layout, s); err == nil {
+			d.Time = t
+			return nil
+		}
+	}
+	return fmt.Errorf("aex: cannot parse date %q", s)
+}
+
+// TFBool is a boolean that the API encodes as the strings "t" and "f"
+// (e.g., incluye_pickup, incluye_envio). It also tolerates true, false,
+// and null on decode.
+type TFBool bool
+
+// MarshalJSON implements json.Marshaler, always emitting "t" or "f".
+func (t TFBool) MarshalJSON() ([]byte, error) {
+	if t {
+		return []byte(`"t"`), nil
+	}
+	return []byte(`"f"`), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (t *TFBool) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	switch s {
+	case "t", "true":
+		*t = true
+	case "f", "false", "", "null":
+		*t = false
+	default:
+		return fmt.Errorf("aex: cannot parse boolean %q", s)
+	}
+	return nil
+}
+
+// FlexInt is an integer that the API sometimes encodes as a JSON string
+// (e.g., delivery point identifiers). It unmarshals from both numbers and
+// strings, and marshals as a number.
+type FlexInt int
+
+// MarshalJSON implements json.Marshaler.
+func (f FlexInt) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Itoa(int(f))), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (f *FlexInt) UnmarshalJSON(data []byte) error {
+	s := strings.Trim(string(data), `"`)
+	if s == "" || s == "null" {
+		*f = 0
+		return nil
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return fmt.Errorf("aex: cannot parse integer %q", s)
+	}
+	*f = FlexInt(n)
+	return nil
+}
+
+// Load types for codigo_tipo_carga (P is the API default when omitted).
+const (
+	// LoadPackage is a conventional package (codigo_tipo_carga "P").
+	LoadPackage = "P"
+	// LoadDocument is a document or envelope (codigo_tipo_carga "D").
+	LoadDocument = "D"
+)
+
+// Delivery point types (tipo).
+const (
+	// PointTypeCAC is a customer service center.
+	PointTypeCAC = "CAC"
+	// PointTypeELocker is a self-service terminal.
+	PointTypeELocker = "ELOCKER"
+)
+
+// AdditionalService is an extra service beyond freight (e.g., insurance)
+// attached to a quote or service condition.
+type AdditionalService struct {
+	// ID is the AEX additional service identifier (id_adicional).
+	ID int `json:"id_adicional"`
+	// Name is the service name (denominacion).
+	Name string `json:"denominacion"`
+	// Cost is the additional service cost in guaraníes.
+	Cost float64 `json:"costo"`
 }

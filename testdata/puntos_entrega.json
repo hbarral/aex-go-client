@@ -1,0 +1,36 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "id": "17",
+      "tipo": "CAC",
+      "pickup": true,
+      "entrega": true,
+      "latitud": -25.282,
+      "longitud": -57.635,
+      "telefono": "021123456",
+      "direccion": "Av. Example 123",
+      "tercerizado": false,
+      "codigo_ciudad": "ASU",
+      "punto_entrega": "CAC Centro",
+      "predeterminado": true,
+      "horario_atencion": "L-S 08:00-18:00"
+    },
+    {
+      "id": 42,
+      "tipo": "ELOCKER",
+      "pickup": true,
+      "entrega": false,
+      "latitud": -25.264,
+      "longitud": -57.576,
+      "telefono": "098111222",
+      "direccion": "Calle Secundaria 456",
+      "tercerizado": true,
+      "codigo_ciudad": "ASU",
+      "punto_entrega": "Elocker Shopping",
+      "predeterminado": false,
+      "horario_atencion": "L-D 10:00-22:00"
+    }
+  ]
+}

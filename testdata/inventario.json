@@ -1,0 +1,16 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "codigo_producto": "SKU-1",
+      "existencia": 12,
+      "denominacion": "Camiseta"
+    },
+    {
+      "codigo_producto": "SKU-2",
+      "existencia": 0,
+      "denominacion": "Taza"
+    }
+  ]
+}

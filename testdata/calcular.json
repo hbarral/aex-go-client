@@ -1,0 +1,32 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "id_tipo_servicio": 3,
+      "tipo_servicio": "Moto",
+      "descripcion": "Entrega el mismo dia dentro de la ciudad",
+      "tiempo_entrega": 6,
+      "incluye_pickup": "t",
+      "incluye_envio": "t",
+      "costo_flete": 25000.5,
+      "adicionales": [
+        {
+          "id_adicional": 1,
+          "denominacion": "Seguro",
+          "costo": 500
+        }
+      ]
+    },
+    {
+      "id_tipo_servicio": 4,
+      "tipo_servicio": "Retiro en sucursal",
+      "descripcion": "Retira en punto de entrega",
+      "tiempo_entrega": 48,
+      "incluye_pickup": "f",
+      "incluye_envio": "f",
+      "costo_flete": 15000,
+      "adicionales": []
+    }
+  ]
+}

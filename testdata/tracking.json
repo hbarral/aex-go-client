@@ -1,0 +1,24 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "numero_guia": "A002866303",
+      "fecha": "2025-06-06 12:34:56",
+      "codigo_estado": "E",
+      "estado": "Entregado",
+      "codigo_tipo_evento": "W5",
+      "tipo_evento": "Entrega Realizada",
+      "observacion": "Paquete entregado correctamente"
+    },
+    {
+      "numero_guia": "A002866303",
+      "fecha": "2025-06-05 09:00:00",
+      "codigo_estado": "R",
+      "estado": "En reparto",
+      "codigo_tipo_evento": "W2",
+      "tipo_evento": "Salio a reparto",
+      "observacion": null
+    }
+  ]
+}

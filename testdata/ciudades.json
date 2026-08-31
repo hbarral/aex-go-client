@@ -1,0 +1,22 @@
+{
+  "codigo": "0",
+  "mensaje": "OK",
+  "datos": [
+    {
+      "codigo_ciudad": "ASU",
+      "denominacion": "Asuncion",
+      "codigo_departamento": "11",
+      "departamento_denominacion": "Asuncion",
+      "codigo_pais": "PY",
+      "pais_denominacion": "Paraguay"
+    },
+    {
+      "codigo_ciudad": "CDE",
+      "denominacion": "Ciudad del Este",
+      "codigo_departamento": "10",
+      "departamento_denominacion": "Alto Parana",
+      "codigo_pais": "PY",
+      "pais_denominacion": "Paraguay"
+    }
+  ]
+}
